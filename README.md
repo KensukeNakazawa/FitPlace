@@ -38,7 +38,7 @@
 - PHP(7.4)
 - Laravel(8.1)
 - Vue.js(2.6)
-- Pythojn
+- Python
 - MySQL(8.0)
 - Nginx(1.1)
 - Redis
