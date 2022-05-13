@@ -33,6 +33,14 @@
 ※ 元々個人開発の webサービスとして開発していましたが、クローズしたのでソースを後悔します。
 本番環境は AWS上のEC2に構築し、Github Actionsを用いてデプロイしていました。
 
+## Main Features
+- 会員登録 (メール or Twitter)
+- ログイン、ログアウト
+- 筋トレの記録
+- 曜日ごとの筋トレの予定登録
+- Line Notify連携
+- Line Notifyによるレポーティング
+
 ## Software
 ### Language
 - PHP(7.4)
