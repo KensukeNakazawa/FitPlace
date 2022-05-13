@@ -1,0 +1,9 @@
+.env
+vendor/*
+node_modules/*
+storage/*
+.idea/*
+bin/*
+*.pyc
+*.ipynb_checkpoints
+*.ipynb
