@@ -1,0 +1,64 @@
+name: FitPlace CI/CD
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  fit-place-tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Make Directory
+        run: |
+          cp .env.example .env
+          mkdir -p storage/framework/cache/data/
+          mkdir -p storage/framework/aop/cache
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p bootstrap/cache
+          mkdir bin
+          mkdir node_modules
+          mkdir vendor
+
+      - name: Directory Permissions
+        run: |
+          chmod -R 777 bin
+          chmod -R 777 bootstrap/cache
+          chmod -R 777 node_modules
+          chmod -R 777 storage
+          chmod -R 777 vendor
+          chmod -R 777 .env
+          chmod -R 777 .phpunit.result.cache
+
+      - name: Docker Build
+        run: |
+          docker-compose up -d
+          docker-compose exec -T application composer install
+          docker-compose exec -T application php artisan key:generate
+          docker-compose exec -T application php artisan migrate --seed
+
+      - name: Run Test
+        run: |
+          docker-compose exec -T application php artisan test
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    needs: [fit-place-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          USER_NAME: ${{ secrets.USER_NAME }}
+          HOST_NAME: ${{ secrets.HOST_NAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} 'cd /www/app/ && git pull origin master && php artisan migrate --force && composer install && npm ci && npm run production && php artisan config:cache && php artisan route:cache && php artisan view:cache'
+

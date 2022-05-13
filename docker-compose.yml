@@ -1,0 +1,93 @@
+version: '3.8'
+volumes:
+  db-store:
+  pip-store:
+services:
+  web:
+    image: nginx:1.19.10
+    container_name: web_server
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./public:/var/www/app/public
+    links:
+      - application
+    depends_on:
+      - application
+    ports:
+      - "8000:80"
+  application:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: application_container
+    volumes:
+      - .:/var/www/app
+    links:
+      - database
+#      - database_testing
+      - cache
+    depends_on:
+      - database
+#      - database_testing
+      - cache
+    environment:
+      - DB_HOST=database
+      - DB_DATABASE=fit_place
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+  batch:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+    container_name: batch_container
+    volumes:
+      - .:/var/www/app
+      - pip-store:/root/opt
+    links:
+      - database
+    depends_on:
+      - database
+    environment:
+      - DB_HOST=database
+      - DB_DATABASE=fit_place
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    working_dir: /var/www/app
+    tty: true
+  database:
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    container_name: db_container
+    volumes:
+    - db-store:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=fit_place
+      - MYSQL_USER=fit_place
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+#  database_testing:
+#    build:
+#      context: .
+#      dockerfile: ./docker/mysql/Dockerfile
+#    container_name: db_test_container
+#    volumes:
+#      - db-store:/var/lib/mysql
+#    command: --default-authentication-plugin=mysql_native_password
+#    environment:
+#      - MYSQL_DATABASE=fit_place_testing
+#      - MYSQL_USER=fit_place
+#      - MYSQL_PASSWORD=root
+#      - MYSQL_ROOT_PASSWORD=root
+#    ports:
+#      - "3307:3307"
+  cache:
+    #https://tech.pjin.jp/blog/2018/02/27/docker%E3%81%A7php%E3%82%A8%E3%83%A9%E3%83%BC%E3%80%8Cphp_network_getaddresses-getaddrinfo-failed-name-or-service-not-known%E3%80%8D/
+    image: redis:6.2.2
+    container_name: cache_container
+    ports:
+      - "6379:6379"
+    command: redis-server
