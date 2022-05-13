@@ -30,12 +30,8 @@
 ## About FitPlace
 筋トレの予定と実施内容をいれることで筋トレをもっとやりやすくするためのサービス
 
-## Rule
-### Issue and PR Prefix
-- UI/UX: :star2:
-- New Function: :hotsprings:
-- Devlop Env: :coffee:
-- Bug Fix: :shipit:
+※ 元々個人開発の webサービスとして開発していましたが、クローズしたのでソースを後悔します。
+本番環境は AWS上のEC2に構築し、Github Actionsを用いてデプロイしていました。
 
 ## Software
 ### Language
@@ -47,27 +43,7 @@
 - Nginx(1.1)
 - Redis
 
-### Develop
-- Docker & docker-compose
-- git
-- CircleCI(WIP)
-
-## URI
-/ is application path
-
-Use "Vue.js" in front end of user side
-
-/admin/ is administration path
-
-Use "blade.php" if front end of admin side
-
-Under a command can check backend routing
->  docker-compose exec application php artisan route:list
-
-## About Develop Environment
-This project using docker to developing  
-
-Under a command set up dev env
+## Setup
 > make set-up  
 
 access to http://localhost:8000/
@@ -86,3 +62,6 @@ access to http://localhost:8000/
 ### Execute test
 Under a command execute test 
 > make test
+
+### Check route
+>  docker-compose exec application php artisan route:list
